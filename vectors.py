@@ -3,37 +3,19 @@ from datasketch import MinHash, MinHashLSHForest
 samples = {
     "server_1": {
         "headers": {
-            "Server": "nginx",
-            "Content-Type": "text/html",
-            "X-Frame-Options": "SAMEORIGIN"
+            "test": "test",
         },
         "tls": {
-            "tls_version": "1.3",
-            "cipher_suite": "TLS_AES_256_GCM_SHA384"
+            
         }
     },
     "server_2": {
         "headers": {
-            "Server": "apache",
-            "Content-Type": "text/html",
-            "X-Content-Type-Options": "nosniff"
+            
         },
         "tls": {
-            "tls_version": "1.2",
-            "cipher_suite": "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
         }
     },
-    "server_3": {
-        "headers": {
-            "Server": "nginx",
-            "Content-Type": "text/html",
-            "X-Frame-Options": "SAMEORIGIN"
-        },
-        "tls": {
-            "tls_version": "1.3",
-            "cipher_suite": "TLS_AES_256_GCM_SHA384"
-        }
-    }
 }
 
 
