@@ -102,3 +102,116 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+
+
+
+
+
+
+
+
+
+
+import tmap as tm
+import numpy as np
+from matplotlib import pyplot as plt
+from collections import deque, defaultdict
+
+
+def graph_distance(adj_list, source, targets):
+    """ BFS-based shortest path distances from source to all targets """
+    visited = {source: 0}
+    queue = deque([source])
+    
+    while queue:
+        node = queue.popleft()
+        for neighbor in adj_list[node]:
+            if neighbor not in visited:
+                visited[neighbor] = visited[node] + 1
+                queue.append(neighbor)
+        if all(t in visited for t in targets):
+            break
+    
+    return {t: visited.get(t, np.inf) for t in targets}
+
+
+def farthest_point_graph(adj_list, n, k=5, initial_idx=None):
+    """ FPF-style selection on a graph using shortest-path distances """
+    if k >= n:
+        return list(range(n))
+
+    if initial_idx is None:
+        initial_idx = np.random.randint(0, n)
+
+    selected = [initial_idx]
+
+    while len(selected) < k:
+        candidates = [i for i in range(n) if i not in selected]
+        min_dists = []
+
+        for c in candidates:
+            dists = graph_distance(adj_list, c, selected)
+            min_dists.append(min(dists.values()))
+
+        next_point = candidates[np.argmax(min_dists)]
+        selected.append(next_point)
+
+    return selected
+
+
+def main():
+    n = 50
+    edge_list = []
+
+    # Create a random graph
+    for i in range(n):
+        for j in np.random.randint(0, high=n, size=3):
+            edge_list.append([i, j, np.random.rand()])
+
+    # Compute layout and get graph edges
+    x, y, s, t, _ = tm.layout_from_edge_list(n, edge_list, create_mst=False)
+
+    # Convert coordinates to numpy arrays
+    x_array = np.array([x[i] for i in range(len(x))])
+    y_array = np.array([y[i] for i in range(len(y))])
+    points = np.column_stack((x_array, y_array))
+
+    # Build adjacency list
+    adj_list = defaultdict(list)
+    for i in range(len(s)):
+        adj_list[s[i]].append(t[i])
+        adj_list[t[i]].append(s[i])  # undirected
+
+    # Use graph-based FPF
+    selected_indices = farthest_point_graph(adj_list, n=n, k=5)
+
+    # Plotting
+    for i in range(len(s)):
+        plt.plot(
+            [x[s[i]], x[t[i]]],
+            [y[s[i]], y[t[i]]],
+            "k-",
+            linewidth=0.5,
+            alpha=0.5,
+            zorder=1,
+        )
+
+    plt.scatter(x_array, y_array, c="blue", s=30, zorder=2, label="All Points")
+    plt.scatter(
+        [x_array[i] for i in selected_indices],
+        [y_array[i] for i in selected_indices],
+        c="red",
+        s=100,
+        zorder=3,
+        label="Diverse Points (Graph)"
+    )
+
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig("diverse_points_graph_fpf.png")
+
+
+if __name__ == "__main__":
+    main()
